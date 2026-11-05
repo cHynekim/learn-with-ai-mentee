@@ -1,0 +1,38 @@
+# ---------- 비밀 정보 (API 키, JWT 시크릿, OAuth 키, DB 접속 정보) ----------
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# 인증서·키 파일 (AWS 배포 시 생성될 수 있는 것들)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+.aws/
+
+# ---------- 개인 정보 (학생이 올린 노트 사진, DB 덤프) ----------
+server/uploads/
+uploads/
+*.sql.gz
+*.dump
+*.backup
+dump.sql
+backup*.sql
+
+# ---------- 로컬 도구 설정 ----------
+.claude/settings.local.json
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---------- 빌드·의존성·로그 ----------
+node_modules/
+dist/
+*.log
+npm-debug.log*
+.vite/
+coverage/

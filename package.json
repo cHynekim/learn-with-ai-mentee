@@ -1,0 +1,13 @@
+{
+  "name": "mentee",
+  "private": true,
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "seed": "npm --prefix server run seed",
+    "dev": "concurrently -n server,client -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start",
+    "setup": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": { "concurrently": "^9.1.0" }
+}
