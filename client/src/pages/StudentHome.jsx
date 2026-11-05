@@ -69,7 +69,7 @@ export default function StudentHome() {
       form.append('content', content);
       if (photo) form.append('photo', photo);
       const d = await api('/student/sessions', { method: 'POST', form });
-      nav(`/s/${d.session.id}`, { state: { celebrations: d.celebrations } });
+      nav(`/s/${d.session.id}`, { state: { celebrations: d.celebrations, complete: d.complete } });
     } catch (e) {
       toast(e.message);
       setBusy(false);

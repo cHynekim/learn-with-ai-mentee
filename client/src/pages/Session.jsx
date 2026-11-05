@@ -28,6 +28,18 @@ export default function Session() {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [data?.messages.length, thinking]);
 
+  // 개념을 모두 한 번씩 확인하면 자동으로 수업 마치기 (축하 이펙트가 끝나고, 배배의 답을 읽을 시간을 준 뒤)
+  const [autoFinish, setAutoFinish] = useState(Boolean(loc.state?.complete));
+  const finishRef = useRef(null);
+  useEffect(() => {
+    if (!autoFinish || queue.length || thinking || data?.session.status !== 'active') return;
+    const t = setTimeout(() => {
+      setAutoFinish(false);
+      finishRef.current?.(true);
+    }, 2200);
+    return () => clearTimeout(t);
+  }, [autoFinish, queue.length, thinking, data?.session.status]);
+
   if (!data) return <div className="boot">불러오는 중…</div>;
   const { session, messages, concepts, unit, subject } = data;
   const done = session.status === 'done';
@@ -48,6 +60,7 @@ export default function Session() {
         setQueue((q) => [...q, ...r.celebrations]);
         setPopId(r.message.id);
       }
+      if (r.complete) setAutoFinish(true);
     } catch (e) {
       toast(e.message);
       setData((d) => ({ ...d, messages: d.messages.filter((m) => m.id !== temp.id) }));
@@ -56,23 +69,25 @@ export default function Session() {
     }
   };
 
-  const finish = async () => {
+  const finish = async (auto = false) => {
     setFinishing(true);
     try {
       const r = await api(`/student/sessions/${id}/finish`, { method: 'POST' });
       if (r.retry) {
-        // 마치기 전에 배배가 헷갈렸던 개념을 한 번 더 물어봄 → 대답한 뒤 다시 '수업 마치기'
+        // 마치기 전에 배배가 헷갈렸던 개념을 한 번 더 물어봄 → 대답하면 (자동으로) 마무리
         setData((d) => ({ ...d, messages: [...d.messages, r.message] }));
         setPopId(r.message.id);
         setFinishing(false);
         return;
       }
+      if (auto) toast('모든 개념을 한 번씩 확인해서 수업을 마쳤어요');
       nav(`/s/${id}/result`);
     } catch (e) {
       toast(e.message);
       setFinishing(false);
     }
   };
+  finishRef.current = finish;
 
   return (
     <div className="page chat-page">
@@ -89,8 +104,8 @@ export default function Session() {
           <b>{explainedCount}</b>
         </div>
         {!done ? (
-          <button className="btn btn-sm btn-ink" onClick={finish} disabled={finishing || thinking || messages.length < 2}>
-            {finishing ? '정리 중…' : '수업 마치기'}
+          <button className="btn btn-sm btn-ink" onClick={() => finish(false)} disabled={finishing || thinking || messages.length < 2}>
+            {finishing ? '정리 중…' : autoFinish ? '곧 마쳐요…' : '수업 마치기'}
           </button>
         ) : (
           <button className="btn btn-sm" onClick={() => nav(`/s/${id}/result`)}>결과 보기</button>

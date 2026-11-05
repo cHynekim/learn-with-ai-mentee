@@ -126,7 +126,10 @@ async function runTurn({ session, user, image }) {
     out.reply,
     JSON.stringify({ celebrations, attachments }),
   ]);
-  return { message: msg, celebrations, concepts: await sessionStatusMap(session.id) };
+  const concepts = await sessionStatusMap(session.id);
+  // 단원의 모든 개념을 이번 대화에서 한 번씩 확인했으면(설명함/헷갈림) → 클라이언트가 자동으로 수업 마치기를 진행
+  const complete = unit.concepts.every((c) => concepts[c.id]);
+  return { message: msg, celebrations, concepts, complete };
 }
 
 // 대화를 마치기 전, 헷갈렸던 개념을 한 번 더 물어보는 배배의 말

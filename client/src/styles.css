@@ -22,6 +22,8 @@
 
   --ok-bg: #dcf5e9;
   --ok-text: #1b7a55;
+  --sky-bg: #e1f1fc;
+  --sky-text: #1d5f8c;
   --warn-bg: #fff4cc;
   --warn-text: #7a5a00;
   --idle-bg: #e6efe9;
@@ -48,6 +50,8 @@
 
     --ok-bg: rgba(52, 195, 143, 0.17);
     --ok-text: #6fe0b6;
+    --sky-bg: rgba(91, 170, 230, 0.16);
+    --sky-text: #8fcaf5;
     --warn-bg: rgba(255, 213, 79, 0.16);
     --warn-text: #ffd54f;
     --idle-bg: #18231d;
@@ -70,6 +74,8 @@
 
   --ok-bg: rgba(52, 195, 143, 0.17);
   --ok-text: #6fe0b6;
+  --sky-bg: rgba(91, 170, 230, 0.16);
+  --sky-text: #8fcaf5;
   --warn-bg: rgba(255, 213, 79, 0.16);
   --warn-text: #ffd54f;
   --idle-bg: #18231d;
@@ -337,8 +343,8 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .res-score { display: flex; align-items: baseline; gap: 8px; color: var(--text-2); }
 .res-score b { font-size: 40px; font-weight: 800; color: var(--text); }
 .trophies { display: grid; gap: 8px; }
-.trophy { border-radius: var(--r-sm); padding: 12px 14px; background: var(--ok-bg); color: var(--ok-text); }
-.trophy.fixed { background: var(--warn-bg); color: var(--warn-text); }
+.trophy { border-radius: var(--r-sm); padding: 12px 14px; background: var(--sky-bg); color: var(--sky-text); } /* 해낸 것: 하늘색 */
+.trophy.fixed { background: var(--sky-bg); color: var(--sky-text); }
 .t-title { font-weight: 700; }
 .t-note { font-size: 13px; margin-top: 4px; opacity: 0.85; line-height: 1.45; }
 .t-badge { font-size: 12px; font-weight: 700; margin-top: 6px; }

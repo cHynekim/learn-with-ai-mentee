@@ -70,11 +70,6 @@ export default function Result() {
           ) : (
             <p className="muted">배배와 끝까지 대화를 나눴어요! 다음엔 개념을 하나씩 꺼내 볼까요?</p>
           )}
-          {s.did_well?.length > 0 && (
-            <ul className="did-well">
-              {s.did_well.map((t, i) => <li key={i}>{t}</li>)}
-            </ul>
-          )}
         </section>
 
         {(groups.confused.length > 0 || s.growth?.length > 0) && (
@@ -83,7 +78,7 @@ export default function Result() {
             {groups.confused.length > 0 && (
               <div className="chips-wrap">
                 {groups.confused.map((c) => (
-                  <span key={c.id} className="tag tag-warn">
+                  <span key={c.id} className="tag tag-ok">
                     {c.title}
                     {c.retryOk ? ' · 다시 설명함' : ''}
                   </span>
