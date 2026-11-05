@@ -1,0 +1,26 @@
+# 비밀 정보: 이미지에 절대 넣지 않음 (실행할 때 --env-file 로 전달)
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+
+# 의존성·빌드 결과는 이미지 안에서 새로 만듦
+**/node_modules
+**/dist
+
+# 학생 업로드 사진(개인정보)·로컬 파일
+server/uploads
+.git
+.gitignore
+.claude
+.vscode
+.idea
+*.log
+.DS_Store
+
+# 이미지에 필요 없는 것
+docker-compose.yml
+Dockerfile
+.dockerignore
+README.md

@@ -3,6 +3,7 @@
 .env.*
 **/.env
 **/.env.*
+*.env
 !**/.env.example
 
 # 인증서·키 파일 (AWS 배포 시 생성될 수 있는 것들)

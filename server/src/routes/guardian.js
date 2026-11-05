@@ -5,6 +5,7 @@ import { listSubjects } from '../catalog.js';
 import { requireRole } from './auth.js';
 import { notebooksOverview, notebookDetail } from '../service.js';
 import { guardianInsight } from '../prompts.js';
+import { llmLimit } from '../limits.js';
 
 const r = Router();
 r.use(requireRole('guardian'));
@@ -66,7 +67,7 @@ r.post('/sessions/:id/stickers', async (req, res) => {
   res.json({ sticker: { ...row, ...STICKERS[sticker], from_name: req.user.name, from_role: req.user.role } });
 });
 
-r.post('/students/:sid/insight', async (req, res) => {
+r.post('/students/:sid/insight', llmLimit, async (req, res) => {
   const s = await linkedStudent(req, res);
   if (!s) return;
   const type = req.body?.type;

@@ -7,6 +7,7 @@ import { listSubjects, getSubject, findUnit, unitNo, termLabel, publicSubject, c
 import { requireRole } from './auth.js';
 import { aggregateStatuses, groupConcepts, notebooksOverview, notebookDetail } from '../service.js';
 import { menteeReply, menteeOpener, sessionSummary } from '../prompts.js';
+import { llmLimit } from '../limits.js';
 
 const UPLOAD_DIR = path.resolve('uploads');
 mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -95,7 +96,7 @@ r.get('/home', async (req, res) => {
   res.json({ followups, active });
 });
 
-r.post('/sessions', upload.single('photo'), async (req, res) => {
+r.post('/sessions', llmLimit, upload.single('photo'), async (req, res) => {
   const { subject, unitId } = req.body;
   const content = clean(req.body.content);
   const s = await getSubject(req.user.id, subject);
@@ -113,7 +114,7 @@ r.post('/sessions', upload.single('photo'), async (req, res) => {
   res.json({ session, ...turn });
 });
 
-r.post('/sessions/review', async (req, res) => {
+r.post('/sessions/review', llmLimit, async (req, res) => {
   const { subject } = req.body || {};
   const s = await getSubject(req.user.id, subject);
   if (!s) return res.status(400).json({ error: '과목을 선택해 주세요' });
@@ -144,7 +145,7 @@ r.get('/sessions/:id', async (req, res) => {
   });
 });
 
-r.post('/sessions/:id/messages', async (req, res) => {
+r.post('/sessions/:id/messages', llmLimit, async (req, res) => {
   const session = await ownSession(req, res);
   if (!session) return;
   if (session.status !== 'active') return res.status(400).json({ error: '이미 끝난 대화예요' });
@@ -155,7 +156,7 @@ r.post('/sessions/:id/messages', async (req, res) => {
   res.json({ studentMessage: studentMsg, ...turn });
 });
 
-r.post('/sessions/:id/finish', async (req, res) => {
+r.post('/sessions/:id/finish', llmLimit, async (req, res) => {
   const session = await ownSession(req, res);
   if (!session) return;
   if (session.status !== 'done') {
@@ -204,7 +205,7 @@ r.get('/subjects', async (req, res) => res.json({ subjects: (await listSubjects(
 r.get('/notebooks', async (req, res) => res.json({ notebooks: await notebooksOverview(req.user.id) }));
 
 // 새 노트북: 학교급·학년·학기·과목 → AI가 단원 구성을 만들어 저장
-r.post('/notebooks', async (req, res) => {
+r.post('/notebooks', llmLimit, async (req, res) => {
   try {
     const nb = await createNotebook(req.user.id, req.body || {});
     res.json({ notebook: publicSubject(nb) });

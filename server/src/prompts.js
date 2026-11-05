@@ -37,8 +37,18 @@ ${conceptBlock(unit, statusMap)}
 {"reply":"배배의 대답","evaluations":[{"concept_id":"개념id","status":"explained|confused","note":"선배가 설명한 내용 한 줄 요약(긍정적으로)"}]}`;
 }
 
+// 긴 대화에서 토큰 비용이 계속 늘지 않도록: 첫 메시지(오늘 배운 내용 정리) + 최근 메시지만 보냄
+const MAX_HISTORY = 30;
+function capHistory(messages) {
+  if (messages.length <= MAX_HISTORY) return messages;
+  const [first, ...rest] = messages;
+  let tail = rest.slice(-(MAX_HISTORY - 1));
+  if (tail[0]?.role === first.role) tail = tail.slice(1); // 같은 역할이 연달아 오지 않게
+  return [first, ...tail];
+}
+
 function toChatHistory(messages) {
-  return messages.map((m) => ({
+  return capHistory(messages).map((m) => ({
     role: m.role === 'student' ? 'user' : 'assistant',
     content: m.role === 'mentee' ? JSON.stringify({ reply: m.content }) : m.content,
   }));

@@ -4,10 +4,13 @@ import crypto from 'node:crypto';
 import { one, inviteCode } from '../db.js';
 
 const r = Router();
+// 'dev-secret'은 로컬 개발용 기본값. production에서는 index.js가 JWT_SECRET 없이 시작하지 않음
 const SECRET = () => process.env.JWT_SECRET || 'dev-secret';
 const CLIENT = () => process.env.CLIENT_URL || '';
-const SERVER = () => process.env.SERVER_URL || 'http://localhost:4000';
-const cookieOpts = { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 1000 * 60 * 60 * 24 * 30 };
+const SERVER = () => process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3000}`;
+// secure는 HTTPS일 때만 켜야 함. HTTP 배포에서 켜면 브라우저가 쿠키를 저장하지 않아 로그인이 안 됨
+const baseCookie = { httpOnly: true, sameSite: 'lax', secure: process.env.COOKIE_SECURE === 'true', path: '/' };
+const cookieOpts = { ...baseCookie, maxAge: 1000 * 60 * 60 * 24 * 30 };
 
 const PROVIDERS = {
   google: {
@@ -158,7 +161,7 @@ r.post('/signup', async (req, res) => {
 });
 
 r.post('/logout', (_req, res) => {
-  res.clearCookie('token');
+  res.clearCookie('token', baseCookie);
   res.json({ ok: true });
 });
 

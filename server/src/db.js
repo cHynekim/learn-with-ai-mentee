@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 
 export const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  // RDS는 SSL 필수. DB_SSL=true면 켬 (예전 이름 PGSSL도 인식)
+  ssl: (process.env.DB_SSL ?? process.env.PGSSL) === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
 export const q = (text, params) => pool.query(text, params);
