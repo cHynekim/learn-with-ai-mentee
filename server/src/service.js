@@ -5,7 +5,7 @@ import { listSubjects, getSubject, termLabel, schoolLabel } from './catalog.js';
 // 학생의 과목별 개념 상태 집계 (개념별 가장 최근 상태). sharedOnly면 공유된 세션만.
 export async function aggregateStatuses(studentId, subject, unitId, { sharedOnly = false } = {}) {
   const rows = await many(
-    `SELECT DISTINCT ON (sc.concept_id) sc.concept_id, sc.status, sc.note, sc.fixed
+    `SELECT DISTINCT ON (sc.concept_id) sc.concept_id, sc.status, sc.note, sc.fixed, sc.retry_ok
        FROM session_concepts sc JOIN sessions s ON s.id = sc.session_id
       WHERE s.student_id=$1 AND s.subject=$2 ${unitId ? 'AND s.unit_id=$3' : ''} ${sharedOnly ? 'AND s.shared' : ''}
       ORDER BY sc.concept_id, sc.updated_at DESC`,
@@ -19,7 +19,7 @@ export function groupConcepts(unit, statusRows) {
   for (const c of unit.concepts) {
     const s = statusRows[c.id];
     const status = s?.status || 'not_yet';
-    groups[status].push({ id: c.id, title: c.title, note: s?.note || null, fixed: Boolean(s?.fixed) });
+    groups[status].push({ id: c.id, title: c.title, note: s?.note || null, fixed: Boolean(s?.fixed), retryOk: Boolean(s?.retry_ok) });
   }
   return groups;
 }
@@ -29,7 +29,7 @@ export function orderedUnits(subject, statusRows) {
   return subject.units.map((u, i) => {
     const concepts = u.concepts.map((c, j) => {
       const s = statusRows[c.id];
-      return { id: c.id, no: `${i + 1}-${j + 1}`, title: c.title, status: s?.status || 'not_yet', note: s?.note || null, fixed: Boolean(s?.fixed) };
+      return { id: c.id, no: `${i + 1}-${j + 1}`, title: c.title, status: s?.status || 'not_yet', note: s?.note || null, fixed: Boolean(s?.fixed), retryOk: Boolean(s?.retry_ok) };
     });
     return {
       id: u.id,

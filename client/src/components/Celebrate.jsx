@@ -33,14 +33,18 @@ export default function Celebrate({ items, onDone }) {
     <div className="celebrate" onClick={onDone} role="status" aria-live="assertive">
       <div className={`cele-card ${item.fixed ? 'fixed' : ''}`}>
         <div className="cele-rays" />
-        <div className="cele-badge">{item.fixed ? 'COMEBACK!' : 'CONCEPT CLEAR!'}</div>
+        <div className="cele-badge">{item.fixed ? 'COMEBACK!' : item.retry ? 'NICE RETRY!' : 'CONCEPT CLEAR!'}</div>
         <Mentee size={92} mood="happy" className="cele-momo" />
         <div className="cele-title">
-          {item.fixed ? '헷갈렸던 걸 고쳐냈어!' : '배배가 이해했어!'}
+          {item.fixed ? '헷갈렸던 걸 고쳐냈어!' : item.retry ? '다시 설명해 줘서 이해했어!' : '배배가 이해했어!'}
         </div>
         <div className="cele-concept">{item.title}</div>
         {item.note && <div className="cele-note">{item.note}</div>}
-        <div className="cele-plus">+{item.fixed ? 2 : 1} 개념 별</div>
+        {item.retry ? (
+          <div className="cele-plus">한 번 더 복습하면 완전히 선배 거야 · 노트북 '헷갈리는 부분'에 남겨 둘게</div>
+        ) : (
+          <div className="cele-plus">+{item.fixed ? 2 : 1} 개념 별</div>
+        )}
         {items.length > 1 && <div className="cele-more">+{items.length - 1}개 더!</div>}
       </div>
     </div>

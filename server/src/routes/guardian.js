@@ -104,7 +104,7 @@ r.post('/students/:sid/insight', llmLimit, async (req, res) => {
     '',
     '[최근 학습 기록 (최신순)]',
     ...sessions.map(
-      (x) => `- ${new Date(x.created_at).toLocaleDateString('ko-KR')} ${nameOf[x.subject] || ''}: ${x.summary?.summary || x.title} (잘한 점: ${(x.summary?.did_well || []).join(', ')})`
+      (x) => `- ${new Date(x.created_at).toLocaleDateString('ko-KR')} ${nameOf[x.subject] || ''}: ${x.summary?.summary || x.title} (잘한 점: ${(x.summary?.did_well || []).join(', ')}${x.summary?.growth?.length ? ` / 성장 포인트: ${x.summary.growth.join(', ')}` : ''}${x.summary?.review_tasks?.length ? ` / 개념 보완 과제: ${x.summary.review_tasks.join(', ')}` : ''})`
     ),
     '',
     `[가장 최근 학습에서 학생이 후배에게 직접 한 설명]`,

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { toast } from './Toast.jsx';
+import Mentee from './Mentee.jsx';
 
 const LEVELS = [
   { id: 'elementary', label: '초등', max: 6 },
@@ -91,13 +92,46 @@ export default function NewNotebookSheet({ onClose, onCreated }) {
 
         <div className="nn-preview">
           <span className="nn-cover">{grade && semester ? `${grade}-${semester}` : '?-?'} {subject.trim() || '과목'}</span>
-          <span className="muted tiny">{busy ? '배배가 단원 구성을 정리하고 있어요… (10초 정도 걸려요)' : '단원과 소단원은 교육과정에 맞춰 자동으로 채워져요'}</span>
+          <span className="muted tiny">단원과 소단원은 교육과정에 맞춰 자동으로 채워져요</span>
         </div>
 
         <button className="btn btn-ink" disabled={!ready || busy}>
           {busy ? '만드는 중…' : '노트북 만들기'}
         </button>
       </form>
+      {busy && <CreatingModal term={`${grade}-${semester} ${subject.trim()}`} />}
+    </div>
+  );
+}
+
+const STEPS = ['교육과정을 찾아보는 중', '단원을 순서대로 정리하는 중', '소단원을 나누는 중', '노트북 표지를 꾸미는 중'];
+
+/** 노트북을 만드는 동안 띄우는 로딩 모달 (보통 10초 안팎) */
+function CreatingModal({ term }) {
+  const [step, setStep] = useState(0);
+  const [visible, setVisible] = useState(false); // 바로 끝나는 경우(준비된 노트북) 깜빡이지 않게 잠깐 뒤에 표시
+  useEffect(() => {
+    const show = setTimeout(() => setVisible(true), 300);
+    const t = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 2600);
+    return () => {
+      clearTimeout(show);
+      clearInterval(t);
+    };
+  }, []);
+  if (!visible) return null;
+  return (
+    <div className="loading-modal" role="alertdialog" aria-modal="true" aria-label="노트북을 만드는 중" onClick={(e) => e.stopPropagation()}>
+      <div className="lm-card">
+        <Mentee size={84} mood="curious" className="bob" />
+        <div className="lm-title">{term} 노트북을 만들고 있어요</div>
+        <div className="lm-step" aria-live="polite">
+          배배가 {STEPS[step]}…
+        </div>
+        <div className="lm-bar">
+          <span />
+        </div>
+        <div className="tiny muted">10초 정도 걸려요. 창을 닫지 말고 잠시만 기다려 주세요</div>
+      </div>
     </div>
   );
 }

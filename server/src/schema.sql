@@ -92,5 +92,11 @@ INSERT INTO enabled_notebooks (student_id, subject_id)
   ON CONFLICT DO NOTHING;
 DROP TABLE IF EXISTS hidden_notebooks;
 
+-- 대화 중 헷갈린 개념: 개념 노트를 건네고(needs_retry), 대화 끝에 한 번 더 물어봄(retry_asked).
+-- 다시 물었을 때 잘 설명해도(retry_ok) 노트북에는 '헷갈리는 부분'으로 남김
+ALTER TABLE session_concepts ADD COLUMN IF NOT EXISTS needs_retry BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE session_concepts ADD COLUMN IF NOT EXISTS retry_asked BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE session_concepts ADD COLUMN IF NOT EXISTS retry_ok BOOLEAN NOT NULL DEFAULT false;
+
 -- 간편로그인에서 받아온 프로필 사진
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;

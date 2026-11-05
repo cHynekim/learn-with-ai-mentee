@@ -11,6 +11,7 @@
   --surface: #f3fbf6; /* 컨테이너·입력창 */
   --surface-2: #e6f2ea;
   --surface-3: #d5e8dc;
+  --hairline: #e4e8e6; /* 아주 옅고 얇은 회색 테두리 */
   --text: #1f3a2e;
   --text-2: #4b6658;
   --muted: #82998c;
@@ -37,6 +38,7 @@
     --surface: #15211a;
     --surface-2: #1d2c23;
     --surface-3: #28392f;
+    --hairline: #26332c;
     --text: #e6f4ec;
     --text-2: #afc6b9;
     --muted: #789084;
@@ -58,6 +60,7 @@
   --surface: #15211a;
   --surface-2: #1d2c23;
   --surface-3: #28392f;
+  --hairline: #26332c;
   --text: #e6f4ec;
   --text-2: #afc6b9;
   --muted: #789084;
@@ -239,11 +242,12 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .first-notebook { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 28px 20px; border-radius: var(--r); background: var(--surface); }
 .first-notebook .fn-title { margin: 0; font-weight: 700; font-size: 17px; }
 .first-notebook .tiny { margin: 0 0 6px; }
-.followup { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-align: left; background: var(--surface); border-radius: var(--r); }
+/* 배배가 먼저 묻는 질문: 진한 배경 + 연한 버튼 (라이트·다크 공통) */
+.followup { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-align: left; background: #1f3a2e; color: #f3fbf6; border-radius: var(--r); }
 .fu-text { flex: 1; min-width: 0; }
-.fu-tag { font-size: 12px; font-weight: 600; color: var(--muted); }
+.fu-tag { font-size: 12px; font-weight: 600; color: rgba(243, 251, 246, 0.65); }
 .fu-q { font-weight: 600; font-size: 15px; margin-top: 3px; line-height: 1.45; }
-.fu-go { font-weight: 700; font-size: 13px; background: var(--text); color: var(--bg); padding: 7px 11px; border-radius: 10px; white-space: nowrap; }
+.fu-go { font-weight: 700; font-size: 13px; background: #dcf5e9; color: #1f3a2e; padding: 7px 11px; border-radius: 10px; white-space: nowrap; }
 .composer { display: grid; gap: 10px; }
 .subject-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .subject-chips { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -256,7 +260,7 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .hint { text-align: center; font-size: 13px; color: var(--muted); margin: 2px 0 0; }
 
 /* ---------- teach input ---------- */
-.teach-input { background: var(--surface); border-radius: 20px; padding: 14px 14px 10px; outline: 1.5px solid transparent; transition: outline-color 0.15s; }
+.teach-input { background: var(--surface); border-radius: 20px; padding: 14px 14px 10px; border: 1px solid var(--hairline); outline: 1.5px solid transparent; transition: outline-color 0.15s; }
 .teach-input:focus-within { outline-color: var(--surface-3); }
 .teach-input.is-listening { outline-color: var(--green); }
 .teach-input textarea { width: 100%; border: 0; outline: 0; resize: none; font-size: 16px; line-height: 1.55; min-height: 52px; max-height: 220px; background: transparent; }
@@ -382,7 +386,9 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .sc-date { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-right: auto; }
 .sc-unit { font-size: 12.5px; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
 .sc-title { font-weight: 700; font-size: 15.5px; }
-.sc-sum { margin: 6px 0 10px; color: var(--text-2); line-height: 1.6; font-size: 14.5px; }
+.sc-sum { margin: 6px 0 0; color: var(--text-2); line-height: 1.6; font-size: 14.5px; }
+/* 요약 텍스트·잘한 점과 단원 태그 사이 간격 */
+.session-card > .chips-wrap { margin-top: 14px; }
 .sticker-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .sticker { display: inline-flex; align-items: center; gap: 6px; font-size: 18px; padding: 5px 10px 5px 8px; background: var(--surface-2); border-radius: 999px; animation: stickIn 0.4s cubic-bezier(0.2, 1.8, 0.4, 1); }
 .sticker small { font-size: 12px; font-weight: 600; color: var(--text-2); }
@@ -418,10 +424,15 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 
 .quick-menu {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 40;
-  width: min(760px, calc(100% - 24px)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px;
-  background: var(--surface); border-radius: 18px; outline: 1px solid var(--surface-3);
+  width: min(760px, calc(100% - 24px)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0;
+  background: none;
 }
-.qm-btn { padding: 12px 8px; border-radius: 13px; background: var(--surface-2); text-align: center; font-size: 13px; font-weight: 600; line-height: 1.3; }
+/* 눈에 띄는 새싹 그린 버튼 (컨테이너 배경 없이 버튼만) */
+.qm-btn {
+  padding: 13px 8px; border-radius: 14px; background: var(--green); color: #12301f; text-align: center;
+  font-size: 13px; font-weight: 700; line-height: 1.3; box-shadow: 0 6px 18px rgba(52, 195, 143, 0.35);
+}
+.qm-btn:active { transform: scale(0.97); }
 .sheet-wrap { position: fixed; inset: 0; z-index: 80; background: var(--overlay); display: grid; align-items: end; justify-items: center; animation: fade 0.2s; }
 .sheet { width: min(680px, 100%); max-height: 82dvh; overflow-y: auto; border-radius: 24px 24px 0 0; padding: 12px 20px calc(22px + env(safe-area-inset-bottom)); animation: sheetUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); }
 @keyframes sheetUp { from { transform: translateY(100%); } }
@@ -442,4 +453,73 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- 개념 노트 (대화 중 첨부) ---------- */
+.earned-chip.retry { background: var(--warn-bg); color: var(--warn-text); }
+.note-attach {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; width: 100%; max-width: 320px;
+  border-radius: var(--r-sm); background: var(--surface); text-align: left; color: var(--text);
+  outline: 1px solid var(--surface-3); outline-offset: -1px;
+}
+.note-attach svg { color: var(--green); flex-shrink: 0; }
+.na-text { display: grid; gap: 2px; min-width: 0; }
+.na-text b { font-size: 13.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.na-text small { font-size: 12px; color: var(--muted); }
+.cn-sheet .sheet-title { margin-bottom: 14px; }
+.cn-label { font-size: 12.5px; font-weight: 600; color: var(--green); margin-bottom: 4px; }
+.cn-block { background: var(--surface-2); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 8px; }
+.cn-block h3 { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--text-2); }
+.cn-block p { margin: 0; line-height: 1.65; font-size: 14.5px; }
+.cn-block.warn { background: var(--warn-bg); }
+.cn-block.warn h3, .cn-block.warn p { color: var(--warn-text); }
+.cn-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.cn-actions .btn { width: 100%; margin-top: 0; }
+
+/* ---------- 요약: 성장 포인트 / 개념 보완 과제 ---------- */
+.sum-points { display: grid; gap: 8px; margin-top: 12px; }
+.sp-block { border-radius: var(--r-sm); padding: 10px 12px; }
+.sp-block.grow { background: var(--ok-bg); color: var(--ok-text); }
+.sp-block.task { background: var(--warn-bg); color: var(--warn-text); }
+.sp-label { font-size: 12.5px; font-weight: 700; margin-bottom: 4px; }
+.sp-block ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 13.5px; line-height: 1.55; }
+
+/* ---------- 대화 기록 달력 ---------- */
+.cal-wrap { display: grid; gap: 12px; }
+.calendar { background: var(--surface); border-radius: var(--r); padding: 12px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cal-title { display: grid; justify-items: center; font-weight: 700; font-size: 16px; }
+.cal-title small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-week { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 4px 0; }
+.cal-week.sun { color: #e5484d; }
+.cal-day {
+  aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; font-size: 14px; font-weight: 500;
+  color: var(--text-2); transition: background-color 0.15s, color 0.15s;
+}
+.cal-day.has { background: var(--ok-bg); color: var(--ok-text); font-weight: 700; }
+.cal-day.today { box-shadow: inset 0 0 0 1.5px var(--surface-3); }
+.cal-day.sel { background: var(--green); color: var(--accent-text); font-weight: 800; }
+.cal-day-title { font-weight: 700; font-size: 15px; }
+
+/* ---------- 노트북 생성 로딩 모달 ---------- */
+.loading-modal { position: fixed; inset: 0; z-index: 9500; display: grid; place-items: center; background: var(--overlay); backdrop-filter: blur(4px); padding: 16px; animation: fade 0.2s; }
+.lm-card { width: min(320px, 100%); background: var(--surface); border-radius: 24px; padding: 26px 20px 22px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.lm-title { font-weight: 700; font-size: 17px; }
+.lm-step { font-size: 14px; color: var(--text-2); min-height: 20px; }
+.lm-bar { width: 100%; height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.lm-bar span { display: block; width: 40%; height: 100%; border-radius: 99px; background: var(--green); animation: lmSlide 1.2s ease-in-out infinite; }
+@keyframes lmSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+
+/* ---------- 달력: 응원 스티커 표시 + 떠오르는 이펙트 ---------- */
+.cal-day { position: relative; }
+.sticker-burst { position: fixed; z-index: 9800; width: 0; height: 0; pointer-events: none; }
+.sticker-burst span {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); opacity: 0; line-height: 1;
+  animation-name: stickerFloat; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); animation-fill-mode: forwards;
+}
+@keyframes stickerFloat {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  15% { opacity: 1; transform: translate(calc(-50% + var(--dx) * 0.2), calc(-50% + var(--rise) * 0.15)) scale(1.1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--rise))) scale(0.9) rotate(var(--rot)); }
 }

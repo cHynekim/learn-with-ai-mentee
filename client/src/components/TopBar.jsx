@@ -65,7 +65,14 @@ export function NotebookStrip({ notebooks, onOpen, activeId, onCreate, editing, 
   );
 }
 
-export default function TopBar({ showShelf = true }) {
+const BackIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="m15 5-7 7 7 7" />
+  </svg>
+);
+
+/** backTo: 지정하면 좌측 상단(학생 화면의 노트북 아이콘 자리)에 뒤로 가기 버튼 */
+export default function TopBar({ showShelf = true, backTo }) {
   const { user, setUser } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
@@ -132,7 +139,11 @@ export default function TopBar({ showShelf = true }) {
     <>
       <header className="topbar">
         <div className="tb-left">
-          {showShelf && user?.role === 'student' ? (
+          {backTo ? (
+            <button className="icon-btn" onClick={() => nav(backTo)} aria-label="목록으로 돌아가기">
+              <BackIcon />
+            </button>
+          ) : showShelf && user?.role === 'student' ? (
             <button className="icon-btn" onClick={() => setOpen((o) => !o)} aria-label="과목별 노트북 열기" aria-expanded={open}>
               <ShelfIcon />
             </button>
@@ -141,7 +152,7 @@ export default function TopBar({ showShelf = true }) {
           )}
         </div>
         <Link to="/" className="logo" onClick={() => setOpen(false)}>
-          mentee
+          BaeBae
         </Link>
         <div className="tb-right">
           <ThemeToggle />

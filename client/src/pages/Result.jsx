@@ -5,6 +5,7 @@ import { api } from '../api.js';
 import TopBar from '../components/TopBar.jsx';
 import Mentee from '../components/Mentee.jsx';
 import { toast } from '../components/Toast.jsx';
+import { SummaryPoints } from './Notebook.jsx';
 
 export default function Result() {
   const { id } = useParams();
@@ -76,12 +77,28 @@ export default function Result() {
           )}
         </section>
 
-        {groups.confused.length > 0 && (
+        {(groups.confused.length > 0 || s.growth?.length > 0) && (
           <section className="res-block">
-            <h2 className="h2">배배와 더 이야기해 볼 부분</h2>
-            <div className="chips-wrap">
-              {groups.confused.map((c) => <span key={c.id} className="tag tag-warn">{c.title}</span>)}
-            </div>
+            <h2 className="h2">성장 포인트</h2>
+            {groups.confused.length > 0 && (
+              <div className="chips-wrap">
+                {groups.confused.map((c) => (
+                  <span key={c.id} className="tag tag-warn">
+                    {c.title}
+                    {c.retryOk ? ' · 다시 설명함' : ''}
+                  </span>
+                ))}
+              </div>
+            )}
+            <SummaryPoints growth={s.growth} />
+          </section>
+        )}
+
+        {s.review_tasks?.length > 0 && (
+          <section className="res-block">
+            <h2 className="h2">다음 학습 전까지 개념 보완 과제</h2>
+            <SummaryPoints tasks={s.review_tasks} />
+            <p className="tiny muted">대화 중에 받은 개념 노트를 다시 읽고, 내 말로 정리해 봐요</p>
           </section>
         )}
 

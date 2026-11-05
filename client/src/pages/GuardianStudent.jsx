@@ -3,13 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, fmtDate } from '../api.js';
 import TopBar, { NotebookStrip } from '../components/TopBar.jsx';
 import Mentee from '../components/Mentee.jsx';
-import { UnitAccordion, StickerRow, ExplainedTags } from './Notebook.jsx';
+import { UnitAccordion, StickerRow, ExplainedTags, SummaryPoints, SessionCalendar } from './Notebook.jsx';
 import { toast } from '../components/Toast.jsx';
 
 const QUICK = [
-  { type: 'today', label: '오늘 학생의 학습 요약' },
-  { type: 'persona', label: '우리 학생은 어떤 학생일까?' },
-  { type: 'help', label: '학생의 학습을 도와주려면?' },
+  { type: 'today', short: '오늘 학습 요약', label: '오늘 학생의 학습 요약' },
+  { type: 'persona', short: '학생 분석', label: '우리 학생은 어떤 학생일까?' },
+  { type: 'help', short: '학습 도움', label: '학생의 학습을 도와주려면?' },
 ];
 
 export default function GuardianStudent() {
@@ -67,9 +67,8 @@ export default function GuardianStudent() {
 
   return (
     <div className="page has-quick">
-      <TopBar showShelf={false} />
+      <TopBar showShelf={false} backTo="/" />
       <main className="guardian">
-        <button className="back" onClick={() => nav('/')}>‹ 목록</button>
         <section className="gs-head">
           <div className="sc-avatar lg">{name[0]}</div>
           <div>
@@ -90,9 +89,11 @@ export default function GuardianStudent() {
             <UnitAccordion key={subject} units={detail.units} />
 
             <h2 className="h2">대화 요약</h2>
-            {detail.sessions.length === 0 && <p className="muted">아직 공유된 대화가 없어요. 곧 도착할 거예요!</p>}
-            <div className="session-list">
-              {detail.sessions.map((s) => (
+            <SessionCalendar
+              key={`cal-${subject}`}
+              sessions={detail.sessions}
+              emptyText="아직 공유된 대화가 없어요. 곧 도착할 거예요!"
+              renderCard={(s) => (
                 <article key={s.id} className="session-card card">
                   <div className="sc-top">
                     <span className="sc-date">{fmtDate(s.created_at)}</span>
@@ -107,6 +108,7 @@ export default function GuardianStudent() {
                     </ul>
                   )}
                   <ExplainedTags concepts={s.concepts} />
+                  <SummaryPoints growth={s.summary?.growth} tasks={s.summary?.review_tasks} />
                   <StickerRow stickers={s.stickers} />
                   <div className="cheer">
                     {picker === s.id ? (
@@ -125,8 +127,8 @@ export default function GuardianStudent() {
                     )}
                   </div>
                 </article>
-              ))}
-            </div>
+              )}
+            />
           </>
         )}
       </main>
@@ -134,7 +136,7 @@ export default function GuardianStudent() {
       <nav className="quick-menu" aria-label="AI 분석 퀵메뉴">
         {QUICK.map((q) => (
           <button key={q.type} className="qm-btn" onClick={() => ask(q)}>
-            {q.label.replace('학생', name)}
+            {q.short}
           </button>
         ))}
       </nav>

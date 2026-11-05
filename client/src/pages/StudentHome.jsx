@@ -93,11 +93,24 @@ export default function StudentHome() {
     <div className="page">
       <TopBar />
       <main className="home">
-        <section className="hello">
-          <Mentee size={76} mood="curious" className="bob" />
-          <h1 className="hello-title">{user.name} 선배, {greetingTime()}!</h1>
-          <p className="hello-sub">{line}</p>
-        </section>
+        {subjects && subjects.length === 0 ? (
+          // 처음 만난 날(노트북이 아직 없음): 배배의 첫인사
+          <section className="hello">
+            <Mentee size={76} mood="happy" className="bob" />
+            <h1 className="hello-title">안녕, 나는 배배야!</h1>
+            <p className="hello-sub">
+              배우는 걸 정말 좋아하는 {user.name} 선배의 후배야.
+              <br />
+              선배가 배운 걸 나한테 알려 주면, 나도 열심히 배울게!
+            </p>
+          </section>
+        ) : (
+          <section className="hello">
+            <Mentee size={76} mood="curious" className="bob" />
+            <h1 className="hello-title">{user.name} 선배, {greetingTime()}!</h1>
+            <p className="hello-sub">{line}</p>
+          </section>
+        )}
 
         {followups.length > 0 && (
           <section className="followups" aria-label="배배가 먼저 묻는 질문">
@@ -127,7 +140,7 @@ export default function StudentHome() {
 
         {subjects && subjects.length === 0 && (
           <section className="first-notebook">
-            <p className="fn-title">먼저 노트북을 만들어 볼까?</p>
+            <p className="fn-title">우리 같이 볼 노트북부터 만들어 볼까?</p>
             <p className="muted tiny">학교급·학년·학기·과목을 고르면 배울 단원이 정리된 노트북이 생겨요</p>
             <button className="btn btn-accent" onClick={() => setCreating(true)}>
               첫 노트북 만들기
@@ -144,9 +157,6 @@ export default function StudentHome() {
                   {s.term}
                 </button>
               ))}
-              <button className="chip" onClick={() => setCreating(true)} aria-label="새 노트북 만들기">
-                + 노트북
-              </button>
             </div>
             {cur && (
               <select className="unit-select" value={unitId || ''} onChange={(e) => setUnitId(e.target.value)} aria-label="단원 선택">
@@ -163,7 +173,7 @@ export default function StudentHome() {
             onSubmit={start}
             disabled={busy || !unit}
             autoFocus
-            placeholder={`오늘 배운 ${cur?.name || ''} 내용을 배배에게 내 말로 정리해 줘`}
+            placeholder={`오늘 배운 ${cur?.name || ''} 내용을 배배에게 네 말로 정리해 줘`}
             leading={
               <>
                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setPhoto(e.target.files?.[0] || null)} />

@@ -48,7 +48,7 @@ export default function Login() {
       <div className="auth-hero">
         <Mentee size={88} mood="happy" className="bob" />
         <h1 className="display">
-          배배에게 <mark>알려줘</mark>
+          <mark>배배</mark>에게 알려줘
         </h1>
         <p className="lead">오늘 배운 걸 AI 후배에게 가르치면서<br />내 말로 설명할 수 있는지 확인해 봐요</p>
       </div>
@@ -60,7 +60,6 @@ export default function Login() {
             <span>{p.label}</span>
           </a>
         ))}
-        <p className="tiny muted center">처음이라면 간편로그인 후 역할을 선택해 가입돼요</p>
 
         {info.demo && (
           <div className="demo-box">

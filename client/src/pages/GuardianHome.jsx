@@ -57,7 +57,7 @@ export default function GuardianHome() {
                 <div className="sc-subjects">
                   {s.notebooks.map((n) => (
                     <span key={n.subject} className="mini-progress">
-                      {n.term} · {n.explained}/{n.total}
+                      {n.term}
                     </span>
                   ))}
                 </div>
