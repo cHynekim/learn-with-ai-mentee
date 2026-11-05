@@ -154,7 +154,8 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .theme-toggle.on .tt-knob { transform: translateX(20px); color: #1f3a2e; }
 .theme-toggle.floating { position: fixed; top: 16px; right: 16px; z-index: 60; }
 .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.03em; }
-.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); font-weight: 700; font-size: 14px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); font-weight: 700; font-size: 14px; padding: 0; overflow: hidden; display: grid; place-items: center; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .menu { position: absolute; right: 0; top: 46px; width: 240px; padding: 8px; z-index: 70; display: grid; gap: 4px; background: var(--surface); border-radius: var(--r); outline: 1px solid var(--surface-3); }
 .menu-name { font-weight: 700; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
 .menu-name small { font-weight: 500; color: var(--muted); }
@@ -235,6 +236,9 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .hello-title { font-weight: 700; font-size: clamp(24px, 5vw, 32px); margin: 12px 0 0; letter-spacing: -0.03em; }
 .hello-sub { font-size: clamp(16px, 3.4vw, 19px); color: var(--text-2); margin: 0; }
 .followups { display: grid; gap: 10px; }
+.first-notebook { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 28px 20px; border-radius: var(--r); background: var(--surface); }
+.first-notebook .fn-title { margin: 0; font-weight: 700; font-size: 17px; }
+.first-notebook .tiny { margin: 0 0 6px; }
 .followup { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-align: left; background: var(--surface); border-radius: var(--r); }
 .fu-text { flex: 1; min-width: 0; }
 .fu-tag { font-size: 12px; font-weight: 600; color: var(--muted); }

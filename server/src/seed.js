@@ -18,6 +18,8 @@ const junho = await mk('demo-student2', '준호', 'student', 'JUNHO2');
 const guardian = await mk('demo-guardian', '하늘 부모', 'guardian', null);
 
 await q(`INSERT INTO guardian_links (guardian_id, student_id) VALUES ($1,$2),($1,$3)`, [guardian.id, haneul.id, junho.id]);
+// 새 계정은 노트북 없이 시작하지만, 시연 학생에게는 준비된 2-1 수학·영어 노트북을 넣어 둠
+await q(`INSERT INTO enabled_notebooks (student_id, subject_id) VALUES ($1,'math'),($1,'english'),($2,'math'),($2,'english')`, [haneul.id, junho.id]);
 
 async function session(student, subject, unitId, daysAgo, msgs, concepts, summary) {
   const s = await one(

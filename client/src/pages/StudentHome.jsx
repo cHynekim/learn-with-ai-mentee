@@ -6,6 +6,7 @@ import TopBar from '../components/TopBar.jsx';
 import Mentee from '../components/Mentee.jsx';
 import TeachInput from '../components/TeachInput.jsx';
 import { toast } from '../components/Toast.jsx';
+import NewNotebookSheet from '../components/NewNotebookSheet.jsx';
 
 const GREETINGS = ['오늘은 뭘 알려주러 왔어?', '오늘 배운 거 나도 알려줘! 궁금해 죽겠어', '선배~ 오늘 수업에서 뭐 배웠어?'];
 
@@ -25,8 +26,9 @@ const PlusIcon = () => (
 export default function StudentHome() {
   const { user } = useAuth();
   const nav = useNavigate();
-  const [subjects, setSubjects] = useState([]);
-  const [subject, setSubject] = useState('math');
+  const [subjects, setSubjects] = useState(null); // null = 불러오는 중
+  const [subject, setSubject] = useState(null);
+  const [creating, setCreating] = useState(false);
   const [unitId, setUnitId] = useState(null);
   const [home, setHome] = useState({ followups: [] });
   const [photo, setPhoto] = useState(null);
@@ -44,11 +46,17 @@ export default function StudentHome() {
     return () => window.removeEventListener('notebooks-changed', load);
   }, []);
 
-  const cur = subjects.find((s) => s.id === subject);
+  const cur = subjects?.find((s) => s.id === subject);
   useEffect(() => {
-    if (subjects.length && !cur) setSubject(subjects[0].id);
+    if (subjects?.length && !cur) setSubject(subjects[0].id);
     if (cur) setUnitId(cur.featuredUnit);
   }, [cur?.id, subjects]);
+
+  const onCreated = (nb) => {
+    setCreating(false);
+    setSubject(nb.id);
+    window.dispatchEvent(new Event('notebooks-changed'));
+  };
   const unit = cur?.units.find((u) => u.id === unitId);
 
   const start = async (content) => {
@@ -117,14 +125,28 @@ export default function StudentHome() {
           </section>
         )}
 
+        {subjects && subjects.length === 0 && (
+          <section className="first-notebook">
+            <p className="fn-title">먼저 노트북을 만들어 볼까?</p>
+            <p className="muted tiny">학교급·학년·학기·과목을 고르면 배울 단원이 정리된 노트북이 생겨요</p>
+            <button className="btn btn-accent" onClick={() => setCreating(true)}>
+              첫 노트북 만들기
+            </button>
+          </section>
+        )}
+
+        {subjects?.length > 0 && (
         <section className="composer">
           <div className="subject-row">
             <div role="radiogroup" aria-label="노트북 선택" className="subject-chips">
               {subjects.map((s) => (
                 <button key={s.id} role="radio" aria-checked={subject === s.id} className={`chip ${subject === s.id ? 'on' : ''}`} onClick={() => setSubject(s.id)}>
-                  {s.custom ? s.term : s.name}
+                  {s.term}
                 </button>
               ))}
+              <button className="chip" onClick={() => setCreating(true)} aria-label="새 노트북 만들기">
+                + 노트북
+              </button>
             </div>
             {cur && (
               <select className="unit-select" value={unitId || ''} onChange={(e) => setUnitId(e.target.value)} aria-label="단원 선택">
@@ -161,7 +183,9 @@ export default function StudentHome() {
           />
           <p className="hint">{busy ? '배배가 열심히 듣고 있어요…' : '붙여넣기는 할 수 없어요. 직접 쓰거나 말로 설명해 주세요'}</p>
         </section>
+        )}
       </main>
+      {creating && <NewNotebookSheet onClose={() => setCreating(false)} onCreated={onCreated} />}
     </div>
   );
 }

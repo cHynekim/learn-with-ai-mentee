@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, copyText } from '../api.js';
 import { useAuth } from '../App.jsx';
 import { toast, confirmToast } from './Toast.jsx';
 import NewNotebookSheet from './NewNotebookSheet.jsx';
@@ -71,6 +71,7 @@ export default function TopBar({ showShelf = true }) {
   const loc = useLocation();
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false); // 사진 주소가 만료·차단되면 이니셜로
   const [notebooks, setNotebooks] = useState(null);
   const [sheet, setSheet] = useState(null); // { mode: 'create' } | { mode: 'edit', notebook }
   const [editing, setEditing] = useState(false);
@@ -145,7 +146,11 @@ export default function TopBar({ showShelf = true }) {
         <div className="tb-right">
           <ThemeToggle />
           <button className="avatar" onClick={() => setMenu((m) => !m)} aria-label="내 정보">
-            {user?.name?.[0] || '?'}
+            {user?.avatarUrl && !avatarFailed ? (
+              <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" onError={() => setAvatarFailed(true)} />
+            ) : (
+              user?.name?.[0] || '?'
+            )}
           </button>
           {menu && (
             <div className="menu">
@@ -156,9 +161,9 @@ export default function TopBar({ showShelf = true }) {
               {user.role === 'student' && (
                 <button
                   className="menu-code"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(user.inviteCode);
-                    toast('연결 코드를 복사했어요');
+                  onClick={async () => {
+                    const ok = await copyText(user.inviteCode);
+                    toast(ok ? `연결 코드 ${user.inviteCode}를 복사했어요` : `복사하지 못했어요. 코드 ${user.inviteCode}를 직접 입력해 주세요`);
                   }}
                 >
                   부모님·선생님 연결 코드

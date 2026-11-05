@@ -26,7 +26,7 @@ const PROVIDERS = {
         })
       ).json();
       const me = await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tok.access_token}` } })).json();
-      return { providerId: me.sub, email: me.email, name: me.name };
+      return { providerId: me.sub, email: me.email, name: me.name, avatar: me.picture };
     },
   },
   naver: {
@@ -40,7 +40,7 @@ const PROVIDERS = {
         )
       ).json();
       const me = await (await fetch('https://openapi.naver.com/v1/nid/me', { headers: { Authorization: `Bearer ${tok.access_token}` } })).json();
-      return { providerId: me.response.id, email: me.response.email, name: me.response.name || me.response.nickname };
+      return { providerId: me.response.id, email: me.response.email, name: me.response.name || me.response.nickname, avatar: me.response.profile_image };
     },
   },
   kakao: {
@@ -52,7 +52,10 @@ const PROVIDERS = {
       if (this.secret()) body.client_secret = this.secret();
       const tok = await (await fetch('https://kauth.kakao.com/oauth/token', { method: 'POST', body: new URLSearchParams(body) })).json();
       const me = await (await fetch('https://kapi.kakao.com/v2/user/me', { headers: { Authorization: `Bearer ${tok.access_token}` } })).json();
-      return { providerId: String(me.id), email: me.kakao_account?.email, name: me.kakao_account?.profile?.nickname };
+      const p = me.kakao_account?.profile;
+      // 카카오 기본 프로필(사진 없음)이면 is_default_image=true — 그때는 이니셜을 보여줌
+      const avatar = p && !p.is_default_image ? p.thumbnail_image_url || p.profile_image_url : null;
+      return { providerId: String(me.id), email: me.kakao_account?.email, name: p?.nickname, avatar };
     },
   },
 };
@@ -75,16 +78,32 @@ export const requireUser = (req, res, next) => (req.user ? next() : res.status(4
 export const requireRole = (...roles) => (req, res, next) =>
   req.user && roles.includes(req.user.role) ? next() : res.status(403).json({ error: '권한이 없어요' });
 
-async function findOrCreate(provider, { providerId, email, name }) {
+// 프로필 사진 주소는 https만 저장 (http면 https로 바꿔 시도 — HTTPS 페이지에서 http 이미지는 차단됨)
+function safeAvatar(url) {
+  if (typeof url !== 'string' || url.length > 1000) return null;
+  const u = url.replace(/^http:\/\//, 'https://');
+  return /^https:\/\/[^\s"'<>]+$/.test(u) ? u : null;
+}
+
+async function findOrCreate(provider, { providerId, email, name, avatar }) {
   return one(
-    `INSERT INTO users (provider, provider_id, email, name) VALUES ($1,$2,$3,$4)
-     ON CONFLICT (provider, provider_id) DO UPDATE SET email=COALESCE(EXCLUDED.email, users.email)
+    `INSERT INTO users (provider, provider_id, email, name, avatar_url) VALUES ($1,$2,$3,$4,$5)
+     ON CONFLICT (provider, provider_id) DO UPDATE SET email=COALESCE(EXCLUDED.email, users.email), avatar_url=EXCLUDED.avatar_url
      RETURNING *`,
-    [provider, providerId, email || null, name || null]
+    [provider, providerId, email || null, name || null, safeAvatar(avatar)]
   );
 }
 
-const publicUser = (u) => u && { id: u.id, name: u.name, email: u.email, role: u.role, provider: u.provider, inviteCode: u.role === 'student' ? u.invite_code : undefined };
+const publicUser = (u) =>
+  u && {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    provider: u.provider,
+    avatarUrl: u.avatar_url || null,
+    inviteCode: u.role === 'student' ? u.invite_code : undefined,
+  };
 
 r.get('/providers', (_req, res) => {
   res.json({

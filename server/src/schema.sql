@@ -80,9 +80,17 @@ CREATE TABLE IF NOT EXISTS notebooks (
   UNIQUE (student_id, level, grade, semester, subject)
 );
 
--- 학생이 삭제(숨김)한 기본 제공 노트북
-CREATE TABLE IF NOT EXISTS hidden_notebooks (
+-- 학생이 추가한 기본 제공 노트북(수학·영어 등 미리 준비된 교육과정). 새 계정은 노트북 없이 시작
+CREATE TABLE IF NOT EXISTS enabled_notebooks (
   student_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   subject_id TEXT NOT NULL,
   PRIMARY KEY (student_id, subject_id)
 );
+-- 이전 방식(기본 노트북이 처음부터 보이고 삭제하면 숨김)에서 넘어올 때: 대화 기록이 있는 기본 노트북은 유지
+INSERT INTO enabled_notebooks (student_id, subject_id)
+  SELECT DISTINCT student_id, subject FROM sessions WHERE subject IN ('math', 'english')
+  ON CONFLICT DO NOTHING;
+DROP TABLE IF EXISTS hidden_notebooks;
+
+-- 간편로그인에서 받아온 프로필 사진
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;

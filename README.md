@@ -69,3 +69,16 @@ npm run dev          # server :4000 + client :5173
    - EC2 보안 그룹은 80 인바운드를, RDS 보안 그룹은 EC2에서 오는 5432를 허용해야 합니다.
    - 노트 사진은 컨테이너 안 `uploads/`에 임시 저장되며 컨테이너를 다시 만들면 사라집니다(AI 전달용이라 시연에는 지장 없음).
    - LLM API는 IP당 1분 30회 / 1시간 300회, 서버 전체 하루 3000회로 제한됩니다(`LLM_*` 환경변수로 조정).
+
+### HTTPS (Caddy + 무료 도메인 sslip.io)
+
+`3-39-237-24.sslip.io` 는 별도 등록 없이 `3.39.237.24` 로 연결되는 무료 도메인입니다. Caddy가 앞단에서 HTTPS 인증서를 자동 발급·갱신하고, 앱 컨테이너는 외부에 직접 노출하지 않습니다(설정: `deploy/Caddyfile`).
+
+```bash
+sudo docker network create baebae-net
+sudo docker run -d --name baebae --restart unless-stopped --network baebae-net --env-file .env hellocxh/baebae:latest
+sudo docker run -d --name caddy --restart unless-stopped --network baebae-net -p 80:80 -p 443:443 \
+  -v ~/baebae/Caddyfile:/etc/caddy/Caddyfile:ro -v caddy_data:/data -v caddy_config:/config caddy:2
+```
+
+`.env` 에는 `SERVER_URL=https://3-39-237-24.sslip.io`, `COOKIE_SECURE=true`, `TRUST_PROXY=1` 을 설정합니다. EC2 보안 그룹은 80·443 인바운드를 허용해야 합니다.

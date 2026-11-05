@@ -30,14 +30,14 @@ function fromRow(r) {
 
 export async function listSubjects(studentId) {
   const rows = await many('SELECT * FROM notebooks WHERE student_id=$1 ORDER BY id', [studentId]);
-  const hidden = new Set((await many('SELECT subject_id FROM hidden_notebooks WHERE student_id=$1', [studentId])).map((r) => r.subject_id));
-  return [...Object.values(SUBJECTS).filter((s) => !hidden.has(s.id)), ...rows.map(fromRow)];
+  const enabled = new Set((await many('SELECT subject_id FROM enabled_notebooks WHERE student_id=$1', [studentId])).map((r) => r.subject_id));
+  return [...Object.values(SUBJECTS).filter((s) => enabled.has(s.id)), ...rows.map(fromRow)];
 }
 
 export async function getSubject(studentId, subjectId) {
   if (SUBJECTS[subjectId]) {
-    const hidden = await one('SELECT 1 FROM hidden_notebooks WHERE student_id=$1 AND subject_id=$2', [studentId, subjectId]);
-    return hidden ? null : SUBJECTS[subjectId];
+    const enabled = await one('SELECT 1 FROM enabled_notebooks WHERE student_id=$1 AND subject_id=$2', [studentId, subjectId]);
+    return enabled ? SUBJECTS[subjectId] : null;
   }
   const m = /^nb-(\d+)$/.exec(subjectId || '');
   if (!m) return null;
@@ -115,8 +115,8 @@ export async function createNotebook(studentId, input) {
   const v = validate(input);
   const builtin = sameBuiltin(v);
   if (builtin) {
-    // 삭제했던 기본 노트북이면 다시 꺼내 준다
-    const r = await q('DELETE FROM hidden_notebooks WHERE student_id=$1 AND subject_id=$2', [studentId, builtin.id]);
+    // 미리 준비된 교육과정이 있는 노트북(예: 중2-1 수학·영어)은 AI 생성 대신 그 내용으로 추가
+    const r = await q('INSERT INTO enabled_notebooks (student_id, subject_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [studentId, builtin.id]);
     if (r.rowCount) return builtin;
     throw httpError(409, '이미 같은 노트북이 있어요');
   }
@@ -139,7 +139,7 @@ export async function deleteNotebooks(studentId, subjectIds) {
   let deleted = 0;
   for (const id of new Set(subjectIds)) {
     if (SUBJECTS[id]) {
-      const r = await q('INSERT INTO hidden_notebooks (student_id, subject_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [studentId, id]);
+      const r = await q('DELETE FROM enabled_notebooks WHERE student_id=$1 AND subject_id=$2', [studentId, id]);
       deleted += r.rowCount;
     } else {
       const m = /^nb-(\d+)$/.exec(id || '');

@@ -80,7 +80,9 @@ export default function GuardianStudent() {
 
         <NotebookStrip notebooks={overview.notebooks} activeId={subject} onOpen={(n) => setSubject(n.subject)} />
 
-        {!detail ? (
+        {overview.notebooks.length === 0 ? (
+          <p className="muted">{name} 학생이 아직 노트북을 만들지 않았어요. 첫 노트북이 생기면 여기에서 볼 수 있어요!</p>
+        ) : !detail ? (
           <p className="muted">불러오는 중…</p>
         ) : (
           <>
