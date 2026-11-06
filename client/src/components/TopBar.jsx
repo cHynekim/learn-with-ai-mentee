@@ -194,7 +194,12 @@ export default function TopBar({ showShelf = true, backTo }) {
           <div className="shelf-head">
             <div className="shelf-title">{editing ? `${selected.size}개 선택됨` : '나의 노트북'}</div>
             <div className="shelf-tools">
-              {editing ? (
+              {user?.provider === 'demo' ? (
+                // 시연용 계정: 펜은 비활성 모양으로만 보여 주고, 누르면 안내 (서버에서도 삭제를 막음)
+                <button className="icon-btn is-disabled" aria-disabled="true" aria-label="노트북 삭제 (시연용 계정에서는 사용할 수 없음)" onClick={() => toast('시연용 계정에서는 노트북을 삭제할 수 없어요')}>
+                  <PenIcon />
+                </button>
+              ) : editing ? (
                 <button className="icon-btn danger" onClick={onTrash} aria-label={selected.size ? '선택한 노트북 삭제' : '삭제 모드 끝내기'}>
                   <TrashIcon />
                 </button>

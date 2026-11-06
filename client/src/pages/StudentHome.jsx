@@ -17,6 +17,18 @@ function greetingTime() {
   return '오늘도 수고했어';
 }
 
+// 노트 첨부: jpg·png, 모바일 사진(iOS HEIC·HEIF, Android WebP), pdf만 (서버에서도 실제 내용으로 다시 검사)
+const NOTE_EXT = ['.jpg', '.jpeg', '.png', '.heic', '.heif', '.webp', '.pdf'];
+const NOTE_MIME = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];
+const NOTE_ACCEPT = [...NOTE_EXT, ...NOTE_MIME].join(',');
+const NOTE_MAX_MB = 5;
+const isAllowedNote = (f) => {
+  const name = f.name.toLowerCase();
+  const extOk = NOTE_EXT.some((x) => name.endsWith(x));
+  const mimeOk = !f.type || f.type === 'application/octet-stream' || NOTE_MIME.includes(f.type.toLowerCase());
+  return extOk && mimeOk;
+};
+
 const PlusIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden>
     <path d="M12 5v14M5 12h14" />
@@ -51,6 +63,15 @@ export default function StudentHome() {
     if (subjects?.length && !cur) setSubject(subjects[0].id);
     if (cur) setUnitId(cur.featuredUnit);
   }, [cur?.id, subjects]);
+
+  const pickNote = (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = ''; // 같은 파일을 다시 골라도 onChange가 오도록
+    if (!f) return;
+    if (!isAllowedNote(f)) return toast('지원하지 않는 확장자예요. jpg, png, heic, webp, pdf 파일만 올릴 수 있어요');
+    if (f.size > NOTE_MAX_MB * 1024 * 1024) return toast(`파일은 ${NOTE_MAX_MB}MB까지 올릴 수 있어요`);
+    setPhoto(f);
+  };
 
   const onCreated = (nb) => {
     setCreating(false);
@@ -176,13 +197,13 @@ export default function StudentHome() {
             placeholder={`오늘 배운 ${cur?.name || ''} 내용을 배배에게 네 말로 정리해 줘`}
             leading={
               <>
-                <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
+                <input ref={fileRef} type="file" accept={NOTE_ACCEPT} hidden onChange={pickNote} />
                 <button
                   type="button"
                   className={`icon-btn attach-btn ${photo ? 'on' : ''}`}
                   onClick={() => (photo ? setPhoto(null) : fileRef.current.click())}
-                  aria-label={photo ? '첨부한 사진 빼기' : '노트 사진 첨부 (선택)'}
-                  title={photo ? '첨부 취소' : '노트 사진 첨부 (선택)'}
+                  aria-label={photo ? '첨부한 사진 빼기' : '노트 사진·PDF 첨부 (선택)'}
+                  title={photo ? '첨부 취소' : '노트 사진·PDF 첨부 (jpg, png, heic, webp, pdf)'}
                   style={photo ? { transform: 'rotate(45deg)' } : undefined}
                 >
                   <PlusIcon />

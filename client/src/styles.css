@@ -529,3 +529,4 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
   15% { opacity: 1; transform: translate(calc(-50% + var(--dx) * 0.2), calc(-50% + var(--rise) * 0.15)) scale(1.1); }
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--rise))) scale(0.9) rotate(var(--rot)); }
 }
+.icon-btn.is-disabled { opacity: 0.35; cursor: not-allowed; }

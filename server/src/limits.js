@@ -42,3 +42,12 @@ function perDay(_req, res, next) {
 
 /** LLM을 호출하는 라우트 앞에 붙이는 미들웨어 묶음 */
 export const llmLimit = [perMinute, perHour, perDay];
+
+// 아이 연결 코드: 무작위 대입·디도스 대비 — IP당 15분에 최대 10번 시도
+export const linkLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: tooMany('연결 코드를 너무 많이 시도했어요. 15분 뒤에 다시 시도해 주세요.'),
+});

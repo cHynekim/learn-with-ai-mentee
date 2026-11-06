@@ -74,7 +74,10 @@ export async function authenticate(req, _res, next) {
   next();
 }
 
-export const requireUser = (req, res, next) => (req.user ? next() : res.status(401).json({ error: '로그인이 필요해요' }));
+/** 시연용 계정(npm run seed 로 만든 provider='demo' 계정) 여부 */
+export const isDemoUser = (u) => u?.provider === 'demo';
+
+export const requireUser =(req, res, next) => (req.user ? next() : res.status(401).json({ error: '로그인이 필요해요' }));
 export const requireRole = (...roles) => (req, res, next) =>
   req.user && roles.includes(req.user.role) ? next() : res.status(403).json({ error: '권한이 없어요' });
 
@@ -123,11 +126,26 @@ r.get('/:provider', (req, res) => {
   res.redirect(p.authUrl({ client_id: p.id(), redirect_uri: `${SERVER()}/api/auth/${req.params.provider}/callback`, state }));
 });
 
+/**
+ * OAuth state 검증: URL과 쿠키 양쪽에 모두 값이 있어야 하고(둘 다 없어서 undefined === undefined 로 통과되는 경우 차단),
+ * 우리가 만든 형식(24자리 hex)이어야 하며, 두 값이 같아야 함 (타이밍 공격을 피하려고 일정 시간 비교)
+ */
+function validState(queryState, cookieState) {
+  const fmt = /^[0-9a-f]{24}$/;
+  if (typeof queryState !== 'string' || typeof cookieState !== 'string') return false;
+  if (!fmt.test(queryState) || !fmt.test(cookieState)) return false;
+  return crypto.timingSafeEqual(Buffer.from(queryState), Buffer.from(cookieState));
+}
+
 r.get('/:provider/callback', async (req, res) => {
   const p = PROVIDERS[req.params.provider];
   if (!p) return res.status(404).end();
+  // state는 한 번만 쓰고 바로 지움 (재사용 방지)
+  const cookieState = req.cookies.oauth_state;
+  res.clearCookie('oauth_state', baseCookie);
   try {
-    if (!req.query.code || req.query.state !== req.cookies.oauth_state) throw new Error('state mismatch');
+    if (typeof req.query.code !== 'string' || !req.query.code) throw new Error('missing code');
+    if (!validState(req.query.state, cookieState)) throw new Error('state mismatch');
     const profile = await p.profile(req.query.code, `${SERVER()}/api/auth/${req.params.provider}/callback`, req.query.state);
     const user = await findOrCreate(req.params.provider, profile);
     issue(res, user);
@@ -160,6 +178,10 @@ r.post('/demo', async (req, res) => {
 
 r.post('/signup', async (req, res) => {
   if (!req.user) return res.status(401).json({ error: '로그인이 필요해요' });
+  // 시연용 계정은 여러 사람이 함께 쓰므로 이름·역할을 바꿀 수 없음
+  if (isDemoUser(req.user)) return res.status(403).json({ error: '시연용 계정은 이름이나 역할을 바꿀 수 없어요' });
+  // 가입(역할 선택)은 처음 한 번만 — 이미 역할이 있는 계정은 다시 호출할 수 없음
+  if (req.user.role) return res.status(409).json({ error: '이미 가입을 마친 계정이에요' });
   const { role, name } = req.body || {};
   if (!['student', 'guardian'].includes(role)) return res.status(400).json({ error: '역할을 선택해 주세요' });
   if (!name?.trim()) return res.status(400).json({ error: '이름을 입력해 주세요' });

@@ -5,7 +5,7 @@ import { listSubjects } from '../catalog.js';
 import { requireRole } from './auth.js';
 import { notebooksOverview, notebookDetail } from '../service.js';
 import { guardianInsight } from '../prompts.js';
-import { llmLimit } from '../limits.js';
+import { llmLimit, linkLimit } from '../limits.js';
 
 const r = Router();
 r.use(requireRole('guardian'));
@@ -32,7 +32,7 @@ r.get('/students', async (req, res) => {
   res.json({ students, stickers: STICKERS });
 });
 
-r.post('/link', async (req, res) => {
+r.post('/link', linkLimit, async (req, res) => {
   const code = String(req.body?.code || '').trim().toUpperCase();
   const student = await one(`SELECT id, name FROM users WHERE invite_code=$1 AND role='student'`, [code]);
   if (!student) return res.status(404).json({ error: '코드를 다시 확인해 주세요' });

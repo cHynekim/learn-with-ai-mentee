@@ -1,24 +1,12 @@
 import { Router } from 'express';
-import multer from 'multer';
-import { mkdirSync, readFileSync } from 'node:fs';
-import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { one, many, q } from '../db.js';
 import { listSubjects, getSubject, findUnit, unitNo, termLabel, publicSubject, createNotebook, deleteNotebooks, ensureUnitDetails } from '../catalog.js';
-import { requireRole } from './auth.js';
+import { requireRole, isDemoUser } from './auth.js';
 import { aggregateStatuses, groupConcepts, notebooksOverview, notebookDetail } from '../service.js';
 import { menteeReply, menteeOpener, sessionSummary } from '../prompts.js';
 import { llmLimit } from '../limits.js';
-
-const UPLOAD_DIR = path.resolve('uploads');
-mkdirSync(UPLOAD_DIR, { recursive: true });
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: UPLOAD_DIR,
-    filename: (_req, file, cb) => cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname) || '.jpg'}`),
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => cb(null, /^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype)),
-});
+import { notePhoto, AI_VIEWABLE } from '../uploads.js';
 
 const r = Router();
 r.use(requireRole('student'));
@@ -163,7 +151,7 @@ r.get('/home', async (req, res) => {
   res.json({ followups, active });
 });
 
-r.post('/sessions', llmLimit, upload.single('photo'), async (req, res) => {
+r.post('/sessions', llmLimit, notePhoto, async (req, res) => {
   const { subject, unitId } = req.body;
   const content = clean(req.body.content);
   const s = await getSubject(req.user.id, subject);
@@ -176,7 +164,8 @@ r.post('/sessions', llmLimit, upload.single('photo'), async (req, res) => {
   );
   await q(`INSERT INTO messages (session_id, role, content) VALUES ($1,'student',$2)`, [session.id, content]);
   let image;
-  if (req.file) image = `data:${req.file.mimetype};base64,${readFileSync(req.file.path).toString('base64')}`;
+  // AI가 볼 수 있는 이미지(jpg·png·webp)만 전달. HEIC·PDF는 첨부로만 저장
+  if (req.file && AI_VIEWABLE.has(req.file.kind)) image = `data:${req.file.detectedMime};base64,${readFileSync(req.file.path).toString("base64")}`;
   const turn = await runTurn({ session, user: req.user, image });
   res.json({ session, ...turn });
 });
@@ -296,6 +285,8 @@ r.post('/notebooks', llmLimit, async (req, res) => {
 });
 
 r.post('/notebooks/delete', async (req, res) => {
+  // 시연용 계정은 여러 사람이 동시에 쓰므로 노트북 삭제를 막음
+  if (isDemoUser(req.user)) return res.status(403).json({ error: '시연용 계정에서는 노트북을 삭제할 수 없어요' });
   const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(String) : [];
   if (!ids.length) return res.status(400).json({ error: '삭제할 노트북을 선택해 주세요' });
   res.json({ deleted: await deleteNotebooks(req.user.id, ids) });
