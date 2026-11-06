@@ -12,6 +12,7 @@
   --surface-2: #e6f2ea;
   --surface-3: #d5e8dc;
   --hairline: #e4e8e6; /* 아주 옅고 얇은 회색 테두리 */
+  --gray-bg: #f1f2f3; /* 연회색 (초록기 없는 중립 회색) */
   --text: #1f3a2e;
   --text-2: #4b6658;
   --muted: #82998c;
@@ -26,7 +27,7 @@
   --sky-text: #1d5f8c;
   --warn-bg: #fff4cc;
   --warn-text: #7a5a00;
-  --idle-bg: #e6efe9;
+  --idle-bg: #e5e7e9;
   --idle-text: #8aa195;
 
   --r: 16px;
@@ -41,6 +42,7 @@
     --surface-2: #1d2c23;
     --surface-3: #28392f;
     --hairline: #26332c;
+    --gray-bg: #1d1f20;
     --text: #e6f4ec;
     --text-2: #afc6b9;
     --muted: #789084;
@@ -54,7 +56,7 @@
     --sky-text: #8fcaf5;
     --warn-bg: rgba(255, 213, 79, 0.16);
     --warn-text: #ffd54f;
-    --idle-bg: #18231d;
+    --idle-bg: #26292b;
     --idle-text: #5e7468;
   }
 }
@@ -65,6 +67,7 @@
   --surface-2: #1d2c23;
   --surface-3: #28392f;
   --hairline: #26332c;
+  --gray-bg: #1d1f20;
   --text: #e6f4ec;
   --text-2: #afc6b9;
   --muted: #789084;
@@ -78,7 +81,7 @@
   --sky-text: #8fcaf5;
   --warn-bg: rgba(255, 213, 79, 0.16);
   --warn-text: #ffd54f;
-  --idle-bg: #18231d;
+  --idle-bg: #26292b;
   --idle-text: #5e7468;
 }
 
@@ -366,7 +369,7 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 .legend .s-confused { background: var(--warn-bg); outline: 1px solid var(--warn-text); outline-offset: -1px; }
 .legend .s-not_yet { background: var(--idle-bg); outline: 1px solid var(--idle-text); outline-offset: -1px; }
 .units { display: grid; gap: 8px; }
-.unit { background: var(--surface); border-radius: var(--r); overflow: hidden; }
+.unit { background: var(--gray-bg); border-radius: var(--r); overflow: hidden; } /* 서재 아코디언: 연회색 */
 .unit-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px; text-align: left; }
 .unit-no { font-weight: 800; color: var(--muted); min-width: 18px; }
 .unit-title { flex: 1; font-weight: 700; font-size: 15.5px; }
@@ -492,7 +495,7 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 
 /* ---------- 대화 기록 달력 ---------- */
 .cal-wrap { display: grid; gap: 12px; }
-.calendar { background: var(--surface); border-radius: var(--r); padding: 12px; }
+.calendar { background: none; padding: 4px 0; } /* 달력 뒤 배경 없음 */
 .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .cal-title { display: grid; justify-items: center; font-weight: 700; font-size: 16px; }
 .cal-title small { font-size: 12px; font-weight: 500; color: var(--muted); }
@@ -530,3 +533,35 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--rise))) scale(0.9) rotate(var(--rot)); }
 }
 .icon-btn.is-disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ---------- 모바일: 홈 화면이 스크롤 없이 한 화면에 들어오도록 ---------- */
+@media (max-width: 520px) {
+  .home { padding: 2.5vh 16px 16px; gap: 14px; min-height: calc(100dvh - 60px); align-content: start; }
+  .hello { gap: 2px; }
+  .hello .mentee { width: 58px; height: 58px; }
+  .hello-title { font-size: 21px; margin-top: 6px; }
+  .hello-sub { font-size: 14.5px; }
+  .followups { gap: 8px; }
+  .followup { padding: 10px 12px; gap: 10px; }
+  .followup .mentee { width: 30px; height: 30px; }
+  .fu-tag { font-size: 11px; }
+  .fu-q { font-size: 13.5px; line-height: 1.4; margin-top: 1px; }
+  .fu-go { font-size: 12px; padding: 6px 9px; }
+  .composer { gap: 8px; }
+  .subject-row { gap: 6px; }
+  .subject-chips .chip { padding: 6px 12px; font-size: 13px; }
+  .unit-select { height: 32px; font-size: 12.5px; background-position: calc(100% - 17px) 14px, calc(100% - 12px) 14px; }
+  .teach-input { padding: 10px 12px 8px; border-radius: 18px; }
+  .teach-input textarea { font-size: 16px; min-height: 40px; } /* 16px 미만이면 iOS가 입력 시 화면을 확대함 */
+  .ti-row { margin-top: 2px; }
+  .ti-row .icon-btn, .send { width: 36px; height: 36px; }
+  .hint { font-size: 12px; margin: 0; }
+  .first-notebook { padding: 20px 16px; }
+}
+/* 세로가 짧은 화면(iPhone SE 등): 인사 부분을 더 줄임 */
+@media (max-width: 520px) and (max-height: 640px) {
+  .home { padding-top: 1.5vh; gap: 10px; }
+  .hello .mentee { width: 44px; height: 44px; }
+  .hello-title { font-size: 19px; margin-top: 2px; }
+  .hello-sub { font-size: 13.5px; }
+}
