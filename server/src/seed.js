@@ -4,18 +4,20 @@ import { pool, one, q, migrate } from './db.js';
 await migrate();
 await q(`DELETE FROM users WHERE provider='demo'`);
 
-const mk = (pid, name, role, code) =>
-  one(`INSERT INTO users (provider, provider_id, email, name, role, invite_code) VALUES ('demo',$1,$2,$3,$4,$5) RETURNING *`, [
+// avatar: client/public/avatars/ 의 이미지 (앱과 같은 주소에서 서빙됨)
+const mk = (pid, name, role, code, avatar = null) =>
+  one(`INSERT INTO users (provider, provider_id, email, name, role, invite_code, avatar_url) VALUES ('demo',$1,$2,$3,$4,$5,$6) RETURNING *`, [
     pid,
     `${pid}@demo.mentee`,
     name,
     role,
     code,
+    avatar,
   ]);
 
-const haneul = await mk('demo-student', '하늘', 'student', 'HANEUL');
+const haneul = await mk('demo-student', '하늘', 'student', 'HANEUL', '/avatars/cat.png');
 const junho = await mk('demo-student2', '준호', 'student', 'JUNHO2');
-const guardian = await mk('demo-guardian', '하늘 부모', 'guardian', null);
+const guardian = await mk('demo-guardian', '하늘 부모', 'guardian', null, '/avatars/flower.png');
 
 await q(`INSERT INTO guardian_links (guardian_id, student_id) VALUES ($1,$2),($1,$3)`, [guardian.id, haneul.id, junho.id]);
 // 새 계정은 노트북 없이 시작하지만, 시연 학생에게는 준비된 2-1 수학·영어 노트북을 넣어 둠
