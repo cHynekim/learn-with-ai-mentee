@@ -243,10 +243,15 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 @keyframes bob { 50% { transform: translateY(-5px); } }
 
 /* ---------- student home ---------- */
-.home { max-width: 720px; margin: 0 auto; padding: 8vh 16px 40px; display: grid; gap: 24px; }
+/* 홈: 인사말(위) · 배배의 질문(가운데) · 칩+입력창(화면 맨 아래)을 같은 간격으로 배치 — 모든 기기 공통 */
+.home {
+  max-width: 720px; margin: 0 auto; min-height: calc(100dvh - 60px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
+  padding: calc(5vh + 10px) 16px calc(16px + env(safe-area-inset-bottom));
+}
 .hello { text-align: center; display: grid; justify-items: center; gap: 6px; }
-.hello-title { font-weight: 700; font-size: clamp(24px, 5vw, 32px); margin: 12px 0 0; letter-spacing: -0.03em; }
-.hello-sub { font-size: clamp(16px, 3.4vw, 19px); color: var(--text-2); margin: 0; }
+.hello-title { font-weight: 700; font-size: clamp(28px, 6vw, 38px); margin: 12px 0 0; letter-spacing: -0.03em; }
+.hello-sub { font-size: clamp(17px, 3.8vw, 21px); color: var(--text-2); margin: 0; }
 .followups { display: grid; gap: 10px; }
 .first-notebook { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 28px 20px; border-radius: var(--r); background: var(--surface); }
 .first-notebook .fn-title { margin: 0; font-weight: 700; font-size: 17px; }
@@ -534,13 +539,31 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
 }
 .icon-btn.is-disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* ---------- 모바일: 홈 화면이 스크롤 없이 한 화면에 들어오도록 ---------- */
-@media (max-width: 520px) {
-  .home { padding: 2.5vh 16px 16px; gap: 14px; min-height: calc(100dvh - 60px); align-content: start; }
-  .hello { gap: 2px; }
-  .hello .mentee { width: 58px; height: 58px; }
-  .hello-title { font-size: 21px; margin-top: 6px; }
-  .hello-sub { font-size: 14.5px; }
+/* ================= 반응형 · 적응형 홈 화면 =================
+   기기 구분: 모바일 ≤ 599px / 태블릿 600–1023px / 데스크톱 ≥ 1024px
+   + 화면 높이에 따라 인사 부분 크기가 함께 줄어들어, 어떤 기기에서도 홈은 스크롤 없이 한 화면 */
+
+/* 공통 안전장치: 어떤 요소도 화면 가로를 넘지 않게 */
+html, body { max-width: 100%; overflow-x: hidden; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
+body { overflow-wrap: anywhere; } /* 띄어쓰기 없는 긴 이름·영단어도 화면 안에서 줄바꿈 */
+img, svg, video, select, textarea, input { max-width: 100%; }
+
+/* 홈 화면은 화면 높이에 딱 맞춤 → 가로·세로 스크롤바 없음 */
+.home-page { height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+.home-page .topbar { position: relative; flex-shrink: 0; }
+.home-page .home { flex: 1; min-height: 0; width: 100%; }
+
+/* 인사 부분: 화면 너비·높이 중 작은 쪽에 맞춰 크기가 자연스럽게 변함 */
+.home { padding-top: calc(clamp(8px, 3vh, 48px) + 10px); }
+.hello { gap: clamp(0px, 0.4vh, 6px); }
+.hello .mentee { width: clamp(40px, 9.5vh, 84px); height: clamp(40px, 9.5vh, 84px); }
+.hello-title { font-size: clamp(20px, min(6.6vw, 4.6vh), 38px); line-height: 1.25; margin-top: clamp(2px, 1vh, 12px); }
+.hello-sub { font-size: clamp(14px, min(4.2vw, 2.7vh), 21px); line-height: 1.45; }
+
+/* ---------- 모바일 (≤ 599px) ---------- */
+@media (max-width: 599px) {
+  .home { padding-left: 16px; padding-right: 16px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); gap: 12px; }
   .followups { gap: 8px; }
   .followup { padding: 10px 12px; gap: 10px; }
   .followup .mentee { width: 30px; height: 30px; }
@@ -552,16 +575,99 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 6px; font-
   .subject-chips .chip { padding: 6px 12px; font-size: 13px; }
   .unit-select { height: 32px; font-size: 12.5px; background-position: calc(100% - 17px) 14px, calc(100% - 12px) 14px; }
   .teach-input { padding: 10px 12px 8px; border-radius: 18px; }
-  .teach-input textarea { font-size: 16px; min-height: 40px; } /* 16px 미만이면 iOS가 입력 시 화면을 확대함 */
+  .teach-input textarea { font-size: 16px; min-height: 40px; } /* 16px 미만이면 iOS가 입력할 때 화면을 확대함 */
   .ti-row { margin-top: 2px; }
   .ti-row .icon-btn, .send { width: 36px; height: 36px; }
   .hint { font-size: 12px; margin: 0; }
   .first-notebook { padding: 20px 16px; }
 }
-/* 세로가 짧은 화면(iPhone SE 등): 인사 부분을 더 줄임 */
-@media (max-width: 520px) and (max-height: 640px) {
-  .home { padding-top: 1.5vh; gap: 10px; }
-  .hello .mentee { width: 44px; height: 44px; }
-  .hello-title { font-size: 19px; margin-top: 2px; }
+
+/* ---------- 태블릿 (600–1023px) ---------- */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .home { max-width: 640px; padding-left: 24px; padding-right: 24px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .followup { padding: 14px 18px; }
+  .fu-q { font-size: 15.5px; }
+}
+
+/* ---------- 데스크톱 (≥ 1024px) ---------- */
+@media (min-width: 1024px) {
+  .home { max-width: 720px; padding-bottom: 24px; }
+}
+
+/* ---------- 세로가 짧은 화면 (작은 휴대폰, 가로로 눕힌 태블릿 등) ---------- */
+@media (max-height: 620px) {
+  .home { gap: 8px; }
+  .followups { gap: 6px; }
+  .followup { padding: 8px 12px; }
+  .fu-q { font-size: 13px; }
+  .teach-input textarea { min-height: 34px; }
+}
+/* 인사 제목은 최대 2줄 (긴 이름이어도 아래 요소를 밀어내지 않게) */
+.hello-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+
+/* 세로 방향 + 화면이 낮은 휴대폰(iPhone SE 등): 질문 카드 2개가 다 들어오도록 더 촘촘하게 */
+@media (orientation: portrait) and (max-height: 600px) {
+  .home-page .home { gap: 10px; }
+  .hello .mentee { width: 38px; height: 38px; }
+  .hello-title { font-size: 21px; }
+  .hello-sub { font-size: 14px; }
+  .followups { gap: 6px; }
+  .followup { padding: 7px 12px; }
+  .followup .mentee { width: 26px; height: 26px; }
+  .fu-q { font-size: 13px; line-height: 1.35; }
+  .composer { gap: 6px; }
+  .teach-input textarea { min-height: 30px; }
+  .ti-row .icon-btn, .send { width: 34px; height: 34px; }
+}
+/* 아주 좁은 세로 화면(너비 340px 이하, iPhone SE 1세대 등): 카드 글이 여러 줄로 길어지므로 더 줄임 */
+@media (orientation: portrait) and (max-width: 340px) {
+  .hint { display: none; }
+  .hello .mentee { width: 32px; height: 32px; }
+  .hello-title { font-size: 20px; }
   .hello-sub { font-size: 13.5px; }
+  .fu-tag { display: none; }
+  .fu-q { font-size: 12.5px; }
+  .fu-go { font-size: 11.5px; padding: 5px 8px; }
+}
+/* 가로 방향 + 화면이 낮을 때(휴대폰을 눕힘): 질문 카드는 1개 */
+@media (orientation: landscape) and (max-height: 600px) {
+  .followup:nth-child(n + 2) { display: none; }
+}
+/* 세로 480px 이하 (휴대폰을 가로로 눕힘): 인사는 제목 한 줄만 */
+@media (max-height: 480px) {
+  .hello .mentee, .hello-sub { display: none; }
+  .hello-title { -webkit-line-clamp: 1; line-clamp: 1; }
+}
+/* 세로 420px 이하 (휴대폰을 가로로 눕힘): 질문 카드 1개는 항상 보이게 — 카드는 한 줄로 간결하게,
+   칩과 단원 선택은 한 줄, 안내 문구는 숨김 */
+@media (max-height: 420px) {
+  .hint { display: none; }
+  .home, .home-page .home { padding-top: 8px; gap: 6px; }
+  .followup { padding: 6px 12px; gap: 10px; }
+  .followup .mentee { width: 26px; height: 26px; }
+  .fu-tag { display: none; }
+  .fu-q { font-size: 13px; line-height: 1.35; margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
+  .fu-go { font-size: 12px; padding: 5px 9px; }
+  .composer { gap: 6px; }
+  .subject-row { flex-wrap: nowrap; }
+  .subject-chips .chip { padding: 5px 11px; font-size: 12.5px; }
+  .unit-select { min-width: 0; flex: 1; height: 30px; }
+  .teach-input { padding: 8px 12px 6px; }
+  .teach-input textarea { min-height: 28px; }
+  .ti-row .icon-btn, .send { width: 32px; height: 32px; }
+}
+
+/* 홈 배치: 질문 카드 위치는 그대로 두고, 인사말만 질문 카드 바로 위로 내림
+   (남는 공간을 인사말 위쪽과 입력창 위쪽에 똑같이 나눔 → 카드 위치 유지) */
+.home-page .hello { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1 1 auto; }
+.home-page .followups { flex: none; }
+.home-page .composer { display: flex; flex-direction: column; justify-content: flex-end; flex: 1 1 auto; }
+.home-page .home { gap: clamp(14px, 3.2vh, 32px); } /* 인사말↔질문 카드 간격 */
+
+/* 휴대폰·태블릿을 가로로 돌렸을 때(터치 기기):
+   질문 카드 너비 = 입력창 너비 - 40px (절대 입력창보다 넓지 않게), 카드 높이는 10px 더 높게 */
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  .home-page .followups { margin-inline: 20px; max-width: calc(100% - 40px); box-sizing: border-box; }
+  /* 화면 높이마다 카드 안쪽 여백이 달라서, 위아래 5px씩 투명 테두리(카드 배경색이 그대로 보임)로 정확히 +10px */
+  .home-page .followup { border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
 }

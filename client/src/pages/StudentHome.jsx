@@ -111,7 +111,7 @@ export default function StudentHome() {
   const followups = home.followups.filter((f) => f.notYet.length || f.confused.length || f.explained.length);
 
   return (
-    <div className="page">
+    <div className="page home-page">
       <TopBar />
       <main className="home">
         {subjects && subjects.length === 0 ? (
